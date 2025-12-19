@@ -1,48 +1,42 @@
 const prisma = require('../config/prismaClient');
 
 exports.createBooking = async (customerId, sessionId, seatIds) => {
-    const TICKET_PRICE = 150.00; 
+    const TICKET_PRICE = 150.00;
     const totalAmount = TICKET_PRICE * seatIds.length;
 
-    try {
-        const result = await prisma.$transaction(async (tx) => {
-            const takenSeats = await tx.ticket.findMany({
-                where: {
-                    session_id: sessionId,
-                    seat_id: { in: seatIds },
-                    status: { not: 'Cancelled' }
-                }
-            });
 
-            if (takenSeats.length > 0) {
-                throw new Error(`Місця ${takenSeats.map(t => t.seat_id).join(', ')} вже зайняті.`);
-            }
-            const booking = await tx.booking.create({
-                data: {
-                    customer_id: customerId,
-                    total_amount: totalAmount,
-                    status: 'Confirmed'
-                }
-            });
-
-            const ticketsData = seatIds.map(seatId => ({
-                booking_id: booking.booking_id,
+    return prisma.$transaction(async (tx) => {
+        const takenSeats = await tx.ticket.findMany({
+            where: {
                 session_id: sessionId,
-                seat_id: seatId,
-                price: TICKET_PRICE,
-                status: 'Paid'
-            }));
-
-            await tx.ticket.createMany({
-                data: ticketsData
-            });
-
-            return booking;
+                seat_id: {in: seatIds},
+                status: {not: 'Cancelled'}
+            }
         });
 
-        return result;
+        if (takenSeats.length > 0) {
+            throw new Error(`Місця ${takenSeats.map(t => t.seat_id).join(', ')} вже зайняті.`);
+        }
+        const booking = await tx.booking.create({
+            data: {
+                customer_id: customerId,
+                total_amount: totalAmount,
+                status: 'Confirmed'
+            }
+        });
 
-    } catch (error) {
-        throw error;
-    }
+        const ticketsData = seatIds.map(seatId => ({
+            booking_id: booking.booking_id,
+            session_id: sessionId,
+            seat_id: seatId,
+            price: TICKET_PRICE,
+            status: 'Paid'
+        }));
+
+        await tx.ticket.createMany({
+            data: ticketsData
+        });
+
+        return booking;
+    });
 };

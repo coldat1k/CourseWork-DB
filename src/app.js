@@ -3,6 +3,11 @@ const cors = require('cors');
 const path = require('path');
 const authRoutes = require('./routes/authRoutes');
 const bookingRoutes = require('./routes/bookingRoutes');
+const analyticsRoutes = require('./routes/analyticsRoutes');
+const movieRoutes = require('./routes/movieRoutes');
+const hallRoutes = require('./routes/hallRoutes');
+const showingRoutes = require('./routes/showingRoutes');
+
 
 const app = express();
 app.use(cors());
@@ -13,6 +18,10 @@ app.get('/tickets', (req, res) => {
 });
 app.use('/api/auth', authRoutes);
 app.use('/api/booking', bookingRoutes);
+app.use('/api/analytics', analyticsRoutes);
+app.use('/api/movies', movieRoutes);
+app.use('/api/halls', hallRoutes);
+app.use('/api/showing', showingRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
