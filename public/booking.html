@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <title>Бронювання місць</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; text-align: center; background: #f0f0f0; padding: 20px; }
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 900px;
+            margin: 0 auto 30px;
+            background: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .top-bar h2 { margin: 0; color: #333; }
+
+        .nav-buttons { display: flex; gap: 10px; }
+
+        .btn {
+            text-decoration: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            font-size: 14px;
+            cursor: pointer;
+            border: none;
+            transition: background 0.2s;
+        }
+
+        .btn-tickets { background: #007bff; color: white; }
+        .btn-tickets:hover { background: #0056b3; }
+
+        .btn-logout { background: #dc3545; color: white; }
+        .btn-logout:hover { background: #a71d2a; }
+        #screen {
+            width: 60%; margin: 0 auto 30px; height: 20px; background: #333; 
+            color: #fff; line-height: 20px; border-radius: 5px; transform: perspective(300px) rotateX(-5deg);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+        }
+
+        #cinema-hall {
+            display: grid;
+            gap: 8px;
+            justify-content: center;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .seat {
+            width: 35px; height: 35px;
+            background: #e0e0e0; border: 1px solid #ccc; border-radius: 6px 6px 12px 12px;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; font-size: 11px; user-select: none;
+            transition: all 0.2s;
+        }
+
+        .seat:hover { background: #c0c0c0; transform: scale(1.1); }
+        .seat.selected { background: #28a745; color: white; border-color: #28a745; }
+        .seat.taken { background: #dc3545; color: white; border-color: #dc3545; cursor: not-allowed; opacity: 0.6; }
+        .action-area { margin-top: 30px; }
+        .btn-big {
+            padding: 12px 30px; font-size: 18px; background: #28a745; color: white;
+            border: none; border-radius: 50px; cursor: pointer; box-shadow: 0 4px 10px rgba(40, 167, 69, 0.3);
+        }
+        .btn-big:hover { background: #218838; transform: translateY(-2px); }
+    </style>
+</head>
+<body>
+
+    <div class="top-bar">
+        <h2>🎬 Зала 1</h2>
+        <div class="nav-buttons">
+            <a href="/tickets" class="btn btn-tickets">🎫 Мої квитки</a>
+            
+            <button onclick="logout()" class="btn btn-logout">Вийти</button>
+        </div>
+    </div>
+
+    <div id="screen">ЕКРАН</div>
+    <div id="cinema-hall">Завантаження зали...</div>
+    
+    <div class="action-area">
+        <button onclick="bookTickets()" class="btn-big">Забронювати обрані</button>
+    </div>
+
+    <script>
+        const SESSION_ID = 1; 
+        const customerId = localStorage.getItem('customer_id');
+        if (!customerId) {
+            window.location.href = '/index.html';
+        }
+        function logout() {
+            localStorage.removeItem('customer_id');
+            localStorage.removeItem('user_name');
+            window.location.href = '/index.html';
+        }
+
+        async function loadSeats() {
+            try {
+                const res = await fetch(`/api/booking/seats/${SESSION_ID}`);
+                if (!res.ok) throw new Error('Не вдалося завантажити місця');
+                
+                const seats = await res.json();
+                renderHall(seats);
+            } catch (e) {
+                document.getElementById('cinema-hall').innerText = e.message;
+            }
+        }
+
+        function renderHall(seats) {
+            const container = document.getElementById('cinema-hall');
+            container.innerHTML = '';
+
+            if (seats.length === 0) {
+                container.innerText = "Місць не знайдено в БД";
+                return;
+            }
+
+            const maxSeatNum = Math.max(...seats.map(s => s.seat_number));
+            container.style.gridTemplateColumns = `repeat(${maxSeatNum}, 35px)`;
+
+            seats.forEach(seat => {
+                const seatDiv = document.createElement('div');
+                seatDiv.classList.add('seat');
+                seatDiv.innerText = `${seat.row_num}-${seat.seat_number}`;
+                seatDiv.dataset.id = seat.seat_id;
+
+                if (seat.is_taken) {
+                    seatDiv.classList.add('taken');
+                    seatDiv.title = "Місце зайняте";
+                } else {
+                    seatDiv.onclick = () => seatDiv.classList.toggle('selected');
+                }
+
+                container.appendChild(seatDiv);
+            });
+        }
+
+        async function bookTickets() {
+            const selectedEls = document.querySelectorAll('.seat.selected');
+            const seatIds = Array.from(selectedEls).map(el => parseInt(el.dataset.id));
+
+            if (seatIds.length === 0) return alert('Ви не обрали жодного місця');
+
+            try {
+                const res = await fetch('/api/booking', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        customer_id: parseInt(customerId),
+                        session_id: SESSION_ID,
+                        seat_ids: seatIds
+                    })
+                });
+
+                const result = await res.json();
+                if (res.ok) {
+                    window.location.href = '/tickets'; 
+                } else {
+                    alert('Помилка: ' + (result.error || JSON.stringify(result)));
+                    loadSeats();
+                }
+            } catch (e) {
+                alert('Помилка мережі');
+            }
+        }
+
+        loadSeats();
+    </script>
+</body>
+</html>
