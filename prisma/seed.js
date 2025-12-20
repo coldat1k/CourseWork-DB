@@ -4,7 +4,6 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('🔄 Починаємо оновлення бази...');
 
-  // Очистка (порядок важен из-за Foreign Keys)
   await prisma.ticket.deleteMany();
   await prisma.booking.deleteMany();
   await prisma.movieGenre.deleteMany();

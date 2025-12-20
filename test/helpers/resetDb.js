@@ -8,7 +8,7 @@ const resetDb = async () => {
         prisma.seat.deleteMany(),
         prisma.movieGenre.deleteMany(),
 
-        // Then delete parent tables
+
         prisma.movie.deleteMany(),
         prisma.hall.deleteMany(),
         prisma.genre.deleteMany(),
