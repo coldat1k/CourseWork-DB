@@ -1,216 +1,62 @@
 # Cinema Booking System
 
-Веб-застосунок для онлайн-бронювання квитків у кінотеатр, створений за допомогою **Node.js**, **Express**, **Prisma ORM**, **PostgreSQL** та **Docker**.
+A web-based application for online movie ticket booking, built with **Node.js**, **Express**, **Prisma ORM**, **PostgreSQL**, and **Docker**. This project ensures a complete ticket purchasing cycle with data integrity guarantees.
 
-> **Курсова робота студента Савицького Юрія групи ІМ-44**
-
----
-
-## Функції
-
-* **Аутентифікація**
-  Реєстрація та вхід користувачів за Email.
-
-* **Інтерактивна зала**
-  Візуальний вибір місць на схемі зали.
-
-* **Бронювання**
-  Створення замовлень з транзакційною цілісністю (захист від подвійного бронювання).
-
-* **Історія квитків**
-  Перегляд історії власних квитків та їх статусів (*Підтверджено / Скасовано*).
-
-* **Динамічність**
-  Відображення зайнятих місць у реальному часі.
-
-* **Адміністрування**
-  Вбудований **pgAdmin** для керування базою даних.
+> **Coursework by Student Yurii Savytskyi, Group IM-44**
 
 ---
 
-## Передумови
+## 🚀 Key Features
 
-* Docker
-* Docker Compose
-* Node.js *(опціонально, для локальної розробки)*
-
----
-
-## Встановлення та налаштування
-
-### 1. Клонування репозиторію
-
-```bash
-cd coursework
-```
+* **Movie & Genre Management**
+  Many-to-Many (`M-N`) relationship support between Movies and Genres via the `MOVIE_GENRE` pivot table.
+* **Interactive Hall Layout**
+  Modeling of Halls (`HALL`) and specific Seats (`SEAT`) mapped to rows and numbers.
+* **Smart Booking System**
+  Transactional creation of `BOOKING` and `TICKET` records. Prevents double-booking using unique database constraints (`UQ_Ticket`).
+* **Customer Management**
+  User registration with **Soft Delete** support (using `is_active` boolean and `deleted_at` timestamp).
+* **Showing Scheduling**
+  Session scheduling with automatic conflict detection within the same hall (`UQ_HallTime`).
 
 ---
 
-### 2. Створення `.env` файлу
+## 🛠 Tech Stack
 
-Створіть файл **`.env`** у кореневій папці проєкту:
+* **Backend:** Node.js, Express.js
+* **Database:** PostgreSQL 16
+* **ORM:** Prisma (Schema-first design)
+* **Containerization:** Docker, Docker Compose
+* **Testing:** Jest (Integration tests)
+
+---
+
+## 🗄 Database Schema
+
+The project uses a relational database designed with the following entities:
+
+| Model | Description |
+| :--- | :--- |
+| **CUSTOMER** | Clients. Supports logical deletion (`is_active`). |
+| **MOVIE** | Movies (Title, Duration, Rating). |
+| **GENRE** | Genre dictionary. |
+| **MOVIE_GENRE** | Pivot table for Many-to-Many relationship between Movies and Genres. |
+| **HALL** | Cinema halls. |
+| **SEAT** | Physical seats (Row, Number). Unique index per hall. |
+| **SHOWING** | Movie sessions (Links Movie, Hall, and Time). |
+| **BOOKING** | Customer orders (Total amount, Date). |
+| **TICKET** | Individual tickets (Links Booking, Session, and Seat). |
+
+---
+
+## ⚙️ Installation & Setup
+
+### 1. Prerequisites
+* Docker & Docker Compose
+* Node.js (v18+)
+
+### 2. Environment Configuration
+Create a `.env` file in the project root:
 
 ```env
-PORT=3000
 DATABASE_URL="postgresql://user:password@db:5432/cinema_db?schema=public"
-POSTGRES_USER=user
-POSTGRES_PASSWORD=password
-POSTGRES_DB=cinema_db
-PGADMIN_DEFAULT_EMAIL=admin@admin.com
-PGADMIN_DEFAULT_PASSWORD=root
-```
-
----
-
-### 3. Запуск контейнерів
-
-```bash
-docker-compose up --build
-```
-
-Ця команда автоматично:
-
-* Підніме **PostgreSQL** (порт `5433`)
-* Підніме **pgAdmin** (порт `5050`)
-* Запустить **Node.js сервер** та виконає міграції Prisma
-
----
-
-### 4. Наповнення тестовими даними (Seeding)
-
-Щоб у базі з'явилися фільми, зали та сеанси, відкрийте нове вікно терміналу:
-
-```bash
-npm run seed
-```
-
-> Команда створює залу, фільм, сеанс та **40 місць**.
-
----
-
-### 5. Доступ до додатку
-
- **[http://localhost:3000](http://localhost:3000)**
-
----
-
-##  Управління базою даних
-
-Додаток використовує **PostgreSQL**. Керувати даними можна через pgAdmin або зовнішні інструменти.
-
----
-
-### Вбудований pgAdmin (рекомендовано)
-
-Перейдіть за адресою:
-
-```
-http://localhost:5050
-```
-
-**Дані для входу:**
-
-* Email: `admin@admin.com`
-* Password: `root`
-
-####  Додавання сервера
-
-1. Натисніть **Add New Server**
-2. Вкладка **General** → Name: `Cinema Docker`
-3. Вкладка **Connection**:
-
-```
-Host name: db
-Port: 5432
-Maintenance database: cinema_db
-Username: user
-Password: password
-```
-
-4. Натисніть **Save**
-
----
-
-##  Команди Prisma (ORM)
-
-```bash
-# Створити міграцію (після змін у schema.prisma)
-npx prisma migrate dev --name init
-
-# Відкрити Prisma Studio
-npx prisma studio
-
-# Перезаписати БД тестовими даними
-npm run seed
-```
-
----
-
-##  Розробка
-
-###  Структура проєкту
-
-```
-src/
- ├─ controllers/   # Обробка HTTP-запитів
- ├─ services/      # Бізнес-логіка (бронювання, транзакції)
- ├─ repositories/  # Робота з БД через Prisma
- ├─ routes/        # API маршрути
- ├─ public/        # Frontend (HTML, CSS, JS)
- │   ├─ index.html     # Вхід / Реєстрація
- │   ├─ booking.html   # Вибір місць
- │   └─ tickets.html   # Історія квитків
-
-prisma/
- ├─ schema.prisma
- └─ seed.js
-
-docker-compose.yml
-```
-
----
-
-## Запуск тестів
-
-Проєкт використовує **Jest** для тестування API:
-
-```bash
-npm test
-```
-
----
-
-## Усунення несправностей
-
-### Помилка `P1000: Authentication failed`
-
-* Перевірте правильність `DATABASE_URL` у `.env`
-* Переконайтесь, що локальний PostgreSQL не використовує порт `5432`
-
----
-
-### Помилка `EADDRINUSE: address already in use :::3000`
-
-Порт `3000` вже зайнятий.
-
-```bash
-docker-compose stop app
-npm run dev
-```
-
-> Не запускайте `npm run dev` паралельно з `docker-compose up`.
-
----
-
-##  Розгортання (Production)
-
-1. Оновіть `.env` (змініть паролі)
-2. Запускайте сервер без `nodemon`
-
-```bash
-npm start
-```
-
----
-
- **Cinema Booking System готовий до використання та демонстрації**

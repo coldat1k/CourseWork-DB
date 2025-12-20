@@ -1,0 +1,96 @@
+@startuml
+
+hide circle
+skinparam linetype ortho
+skinparam classAttributeIconSize 0
+
+
+
+class "Hall" {
+  +hall_id : Int <<PK>>
+  --
+  name_hall : String
+  type_hall : String
+}
+
+class "Seat" {
+  +seat_id : Int <<PK>>
+  --
+  hall_id : Int <<FK>>
+  row_num : Int
+  seat_number : Int
+}
+
+class "Movie" {
+  +movie_id : Int <<PK>>
+  --
+  title : String
+  release_date : DateTime
+  duration : Int
+  rating : Decimal
+}
+
+class "Genre" {
+  +genre_id : Int <<PK>>
+  --
+  genre_name : String
+}
+
+class "MovieGenre" {
+  --
+  movie_id : Int <<FK>>
+  genre_id : Int <<FK>>
+}
+
+class "Showing" {
+  +session_id : Int <<PK>>
+  --
+  movie_id : Int <<FK>>
+  hall_id : Int <<FK>>
+  start_time : DateTime
+}
+
+class "Customer" {
+  +customer_id : Int <<PK>>
+  --
+  full_name : String
+  email_address : String
+  phone_number : String
+  is_active : Boolean
+  deleted_at : DateTime
+}
+
+class "Booking" {
+  +booking_id : Int <<PK>>
+  --
+  customer_id : Int <<FK>>
+  booking_date : DateTime
+  total_amount : Decimal
+  status : String
+}
+
+class "Ticket" {
+  +ticket_id : Int <<PK>>
+  --
+  booking_id : Int <<FK>>
+  session_id : Int <<FK>>
+  seat_id : Int <<FK>>
+  price : Decimal
+  status : String
+}
+
+
+
+Hall "1" -- "*" Seat : has >
+Hall "1" -- "*" Showing : hosts >
+Movie "1" -- "*" Showing : plays >
+
+Movie "1" -- "*" MovieGenre : has >
+Genre "1" -- "*" MovieGenre : defines >
+
+Customer "1" -- "*" Booking : makes >
+Booking "1" -- "*" Ticket : contains >
+Showing "1" -- "*" Ticket : for >
+Seat "1" -- "*" Ticket : reserves >
+
+@enduml
