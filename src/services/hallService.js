@@ -1,7 +1,7 @@
 const prisma = require('../config/prismaClient');
 
 exports.getAllHalls = async () => {
-    return await prisma.hall.findMany({
+    return prisma.hall.findMany({
         include: {
             seats: true
         }
@@ -25,7 +25,7 @@ exports.createHall = async (data) => {
     });
     if (existing) throw new Error('Hall with this name already exists');
 
-    return await prisma.hall.create({
+    return prisma.hall.create({
         data: {
             name_hall,
             type_hall

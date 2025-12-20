@@ -1,7 +1,7 @@
 const prisma = require('../config/prismaClient');
 
 exports.createCustomer = async (data) => {
-    return await prisma.customer.create({
+    return prisma.customer.create({
         data: {
             full_name: data.full_name,
             email_address: data.email_address,
@@ -11,13 +11,13 @@ exports.createCustomer = async (data) => {
 };
 
 exports.findCustomerByEmail = async (email) => {
-    return await prisma.customer.findUnique({
-        where: { email_address: email }
+    return prisma.customer.findUnique({
+        where: {email_address: email}
     });
 };
 
 exports.findCustomerById = async (id) => {
-    return await prisma.customer.findUnique({
-        where: { customer_id: id }
+    return prisma.customer.findUnique({
+        where: {customer_id: id}
     });
 };

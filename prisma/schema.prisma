@@ -4,13 +4,13 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL") //norm
+  url      = env("DATABASE_URL")
 }
 
 model Hall {
   hall_id   Int       @id @default(autoincrement())
-  name_hall String    @unique @db.VarChar(10)
-  type_hall String    @db.VarChar(15)
+  name_hall String    @unique @db.VarChar(30)
+  type_hall String    @db.VarChar(30)
   showings  Showing[]
   seats     Seat[]
 
@@ -30,11 +30,11 @@ model Customer {
 }
 
 model Movie {
-  movie_id     Int           @id @default(autoincrement())
-  title        String        @db.VarChar(40)
-  release_date DateTime      @db.Date
+  movie_id     Int          @id @default(autoincrement())
+  title        String       @db.VarChar(40)
+  release_date DateTime     @db.Date
   duration     Int
-  rating       Decimal?      @db.Decimal(2, 1)
+  rating       Decimal?     @db.Decimal(2, 1)
   genres       MovieGenre[]
   showings     Showing[]
 
@@ -66,10 +66,10 @@ model Showing {
   start_time DateTime @db.Timestamptz
   created_at DateTime @default(now()) @db.Timestamptz
   updated_at DateTime @default(now()) @updatedAt @db.Timestamptz
-  
-  movie      Movie    @relation(fields: [movie_id], references: [movie_id])
-  hall       Hall     @relation(fields: [hall_id], references: [hall_id])
-  tickets    Ticket[]
+
+  movie   Movie    @relation(fields: [movie_id], references: [movie_id], onDelete: Cascade)
+  hall    Hall     @relation(fields: [hall_id], references: [hall_id])
+  tickets Ticket[]
 
   @@unique([hall_id, start_time], name: "UQ_HallTime")
   @@index([hall_id, start_time])
@@ -98,8 +98,8 @@ model Booking {
   created_at   DateTime @default(now()) @db.Timestamptz
   updated_at   DateTime @default(now()) @updatedAt @db.Timestamptz
 
-  customer     Customer @relation(fields: [customer_id], references: [customer_id])
-  tickets      Ticket[]
+  customer Customer @relation(fields: [customer_id], references: [customer_id])
+  tickets  Ticket[]
 
   @@map("BOOKING")
 }
@@ -114,9 +114,9 @@ model Ticket {
   created_at DateTime @default(now()) @db.Timestamptz
   updated_at DateTime @default(now()) @updatedAt @db.Timestamptz
 
-  booking    Booking  @relation(fields: [booking_id], references: [booking_id])
-  showing    Showing  @relation(fields: [session_id], references: [session_id])
-  seat       Seat     @relation(fields: [seat_id], references: [seat_id])
+  booking Booking @relation(fields: [booking_id], references: [booking_id])
+  showing Showing @relation(fields: [session_id], references: [session_id])
+  seat    Seat    @relation(fields: [seat_id], references: [seat_id])
 
   @@unique([session_id, seat_id], name: "UQ_Ticket")
   @@index([session_id, seat_id])

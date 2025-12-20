@@ -30,28 +30,6 @@ exports.getTopGrossingMovies = async () => {
     }
 };
 
-exports.getTopCustomers = async (minSpent = 500) => {
-    try {
-        const result = await prisma.$queryRaw`
-            SELECT 
-                c.full_name,
-                c.email_address,
-                COUNT(b.booking_id) as total_bookings,
-                SUM(b.total_amount) as total_spent,
-                MAX(b.booking_date) as last_booking_date
-            FROM "CUSTOMER" c
-            JOIN "BOOKING" b ON c.customer_id = b.customer_id
-            WHERE c.is_active = true AND b.status = 'Confirmed'
-            GROUP BY c.customer_id, c.full_name, c.email_address
-            HAVING SUM(b.total_amount) >= ${minSpent}
-            ORDER BY total_spent DESC;
-        `;
-        return serializeBigInt(result);
-    } catch (error) {
-        throw error;
-    }
-};
-
 exports.getHallGenreStats = async () => {
     try {
         const result = await prisma.$queryRaw`

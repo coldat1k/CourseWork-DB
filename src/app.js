@@ -17,11 +17,11 @@ app.get('/tickets', (req, res) => {
     res.sendFile(path.join(__dirname, '../public/tickets.html'));
 });
 app.use('/api/auth', authRoutes);
-app.use('/api/booking', bookingRoutes);
+app.use('/api/bookings', bookingRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/movies', movieRoutes);
 app.use('/api/halls', hallRoutes);
-app.use('/api/showing', showingRoutes);
+app.use('/api/showings', showingRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

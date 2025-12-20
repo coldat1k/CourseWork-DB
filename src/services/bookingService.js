@@ -15,7 +15,7 @@ exports.createBooking = async (customerId, sessionId, seatIds) => {
         });
 
         if (takenSeats.length > 0) {
-            throw new Error(`Місця ${takenSeats.map(t => t.seat_id).join(', ')} вже зайняті.`);
+            throw new Error(`Seats ${takenSeats.map(t => t.seat_id).join(', ')} is already taken.`);
         }
         const booking = await tx.booking.create({
             data: {

@@ -1,6 +1,7 @@
 const { validationResult } = require('express-validator');
 const prisma = require('../config/prismaClient');
 const authService = require('../services/authService');
+const {softDeleteCustomer} = require("../services/authService");
 
 exports.register = async (req, res) => {
     const errors = validationResult(req);
@@ -25,10 +26,10 @@ exports.login = async (req, res) => {
         });
 
         if (!customer) {
-            return res.status(404).json({ error: "Користувача з таким email не знайдено. Будь ласка, зареєструйтесь." });
+            return res.status(404).json({ error: "User not found" });
         }
         res.json({ 
-            message: "Успішний вхід", 
+            message: "Successfully logged in",
             customer_id: customer.customer_id,
             full_name: customer.full_name
         });
@@ -37,3 +38,12 @@ exports.login = async (req, res) => {
         res.status(500).json({ error: e.message });
     }
 };
+
+exports.deactivateUser = async (req, res) => {
+    const { id } = req.params;
+    await softDeleteCustomer(id)
+
+    res.json({
+        message: "Successfully deactivated user",
+    });
+}

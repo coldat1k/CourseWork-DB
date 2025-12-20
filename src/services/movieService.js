@@ -1,7 +1,7 @@
 const prisma = require('../config/prismaClient');
 
 exports.getAllMovies = async () => {
-    return await prisma.movie.findMany({
+    return prisma.movie.findMany({
         include: {
             genres: {
                 include: {
@@ -38,7 +38,7 @@ exports.createMovie = async (data) => {
         }
         : undefined;
 
-    return await prisma.movie.create({
+    return prisma.movie.create({
         data: {
             title,
             release_date: new Date(release_date),
@@ -47,7 +47,7 @@ exports.createMovie = async (data) => {
             genres: genreData
         },
         include: {
-            genres: { include: { genre: true } }
+            genres: {include: {genre: true}}
         }
     });
 };

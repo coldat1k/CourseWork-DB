@@ -12,19 +12,6 @@ exports.getMovieAnalytics = async (req, res) => {
     }
 };
 
-exports.getCustomerAnalytics = async (req, res) => {
-    try {
-        const minSpent = req.query.minSpent ? Number(req.query.minSpent) : 500;
-        const data = await analyticsService.getTopCustomers(minSpent);
-        res.status(200).json({
-            success: true,
-            data: data
-        });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-};
-
 exports.getHallStats = async (req, res) => {
     try {
         const data = await analyticsService.getHallGenreStats();

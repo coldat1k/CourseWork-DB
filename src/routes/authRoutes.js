@@ -6,7 +6,8 @@ const { body } = require('express-validator');
 
 router.post('/register', registerValidation, authController.register);
 router.post('/login', [
-    body('email').isEmail().withMessage('Enter valid email')
+    body('email_address').isEmail().withMessage('Enter valid email')
 ], authController.login);
+router.patch('/customers/:id/deactivate', authController.deactivateUser);
 
 module.exports = router;

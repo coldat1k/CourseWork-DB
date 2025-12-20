@@ -1,5 +1,6 @@
 const showingService = require('../services/showingService');
 const { validationResult } = require('express-validator');
+const {getAllShowings} = require("../services/showingService");
 
 exports.rescheduleShowing = async (req, res) => {
     const errors = validationResult(req);
@@ -33,3 +34,9 @@ exports.rescheduleShowing = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
+
+exports.getAllShowings = async (req, res) => {
+    const allShowings = await getAllShowings();
+
+    return res.json(allShowings);
+}

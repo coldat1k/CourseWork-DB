@@ -40,3 +40,15 @@ exports.rescheduleShowing = async (showingId, newStartTime, newHallId) => {
         return updatedShowing;
     });
 };
+
+exports.getAllShowings = async () => {
+    return prisma.showing.findMany({
+        include: {
+            movie: true,
+            hall: true
+        },
+        orderBy: {
+            start_time: 'asc'
+        }
+    });
+}

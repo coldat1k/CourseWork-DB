@@ -18,16 +18,16 @@ exports.createBooking = async (req, res) => {
         );
 
         res.status(201).json({
-            message: 'Бронювання успішне',
+            message: 'Booking created successfully.',
             booking: bookingResult
         });
 
     } catch (error) {
         console.error("Booking Error:", error);
-        if (error.message.includes('вже зайняті')) {
+        if (error.message.includes('is already taken.')) {
             return res.status(409).json({ error: error.message });
         }
-        res.status(500).json({ error: 'Помилка сервера при бронюванні' });
+        res.status(500).json({ error: 'Booking error occurred' });
     }
 };
 
@@ -65,7 +65,7 @@ exports.getSeatsForSession = async (req, res) => {
             where: { session_id: sessionId }
         });
 
-        if (!showing) return res.status(404).json({ error: 'Сеанс не знайдено' });
+        if (!showing) return res.status(404).json({ error: 'Session not found' });
         const allSeats = await prisma.seat.findMany({
             where: { hall_id: showing.hall_id },
             orderBy: [{ row_num: 'asc' }, { seat_number: 'asc' }]
@@ -89,6 +89,6 @@ exports.getSeatsForSession = async (req, res) => {
 
     } catch (error) {
         console.error(error);
-        res.status(500).json({ error: 'Помилка отримання місць' });
+        res.status(500).json({ error: 'Error while getting seats for session' });
     }
 };
